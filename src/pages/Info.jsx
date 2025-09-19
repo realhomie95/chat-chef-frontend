@@ -1,24 +1,61 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PrevButton from "../components/PrevButton";
 import InfoInput from "../components/InfoInput";
 import AddButton from "../components/AddButton";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
 
-const Info = () => {
+const Info = ({ sendIngredientList }) => {
   // logic
   const history = useNavigate();
 
   // TODO: set함수 추가하기
-  const [ingredientList] = useState([]); // 사용자가 입력할 재료 목록
+  const [ingredientList, setIngredientList] = useState([]); // 사용자가 입력할 재료 목록
 
   const addIngredient = () => {
-    console.log("재료 추가하기");
+    // input 추가
+    const id = Date.now();
+    const newItem = {
+      id,
+      label: `ingredient${id}`,
+      text: "재료명",
+      value: "", // 사용자가 입력할 재료 입력값
+    };
+
+    setIngredientList((prev) => [...prev, newItem]);
+  };
+
+  const handleRemove = (selectedId) => {
+    const filterIngredientList = ingredientList.filter(
+      (item) => item.id !== selectedId
+    );
+    setIngredientList(filterIngredientList);
+  };
+
+  const handleInputChange = (updateItem) => {
+    setIngredientList((prev) =>
+      prev.map((item) => (item.id === updateItem.id ? updateItem : item))
+    );
   };
 
   const handleNext = () => {
+    sendIngredientList(ingredientList);
     history("/chat");
   };
+
+  // useEffect 용법 3가지
+  // 1. 컴포넌트에 존재하는 모든 state가 변경될 때마다 특정 작업을 수행
+  // useEffect(() => {});
+
+  // 2. 컴포넌트가 생성되는 딱 한 번만 특정 작업을 수행
+  // useEffect(() => {}, []);
+
+  // 3. 특정 state가 변경될 때마다 특정 작업을 수행
+  // useEffect(() => {}, [ingredientList]);
+
+  useEffect(() => {
+    // console.log("ingredientList==>", ingredientList);
+  }, [ingredientList]);
 
   // view
   return (
@@ -42,7 +79,12 @@ const Info = () => {
             {/* START:input 영역 */}
             <div>
               {ingredientList.map((item) => (
-                <InfoInput key={item.id} content={item} />
+                <InfoInput
+                  key={item.id}
+                  content={item}
+                  onRemove={handleRemove}
+                  onChange={handleInputChange}
+                />
               ))}
             </div>
             {/* END:input 영역 */}
